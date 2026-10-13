@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:erp-test;DB_CLOSE_DELAY=-1
+erp:
+  seed:
+    demo-data: false
+    password: Test-Only-Pass-1

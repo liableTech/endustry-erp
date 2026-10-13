@@ -1,0 +1,109 @@
+{
+  "documentType": "WORK_ORDER",
+  "documentTitle": "Work Order and Job Cards",
+  "company": {
+    "legalName": "Shree Precision Components Pvt Ltd",
+    "tradeName": "Shree Precision",
+    "displayName": "Shree Precision",
+    "gstin": "27AAKCS4821P1ZQ",
+    "pan": "AAKCS4821P",
+    "udyamNumber": "UDYAM-MH-26-0041873",
+    "address": "Plot 14, MIDC Bhosari",
+    "city": "Pune",
+    "pincode": "411026",
+    "addressLine": "Plot 14, MIDC Bhosari, Pune - 411026",
+    "stateCode": "27",
+    "phone": "020 5550 0142",
+    "email": "accounts@shreeprecision.example"
+  },
+  "printedAt": "10-10-2026 11:30",
+  "document": {
+    "number": "WO/26-27/0017",
+    "status": "IN_PROGRESS",
+    "statusLabel": "In progress",
+    "isDraft": false,
+    "isCancelled": false,
+    "startDate": "06-10-2026",
+    "dueDate": "13-10-2026",
+    "completedDate": "",
+    "salesOrderNo": "SO/26-27/0031",
+    "warehouse": "Main store",
+    "bomVersion": 1,
+    "notes": "Customer needs first 40 by Friday."
+  },
+  "item": {
+    "code": "FG-SHAFT-25",
+    "name": "Drive shaft 25 mm",
+    "uom": "NOS"
+  },
+  "quantities": {
+    "planned": "100",
+    "produced": "40",
+    "rejected": "2",
+    "remaining": "58"
+  },
+  "costs": {
+    "standardUnitCost": "290.00",
+    "materialCost": "8,820.00",
+    "operationCost": "2,400.00",
+    "actualUnitCost": "280.50"
+  },
+  "materials": [
+    {
+      "itemCode": "RM-EN8-25",
+      "itemName": "EN8 round bar 25 mm",
+      "uom": "KG",
+      "required": "121.8",
+      "available": "300",
+      "shortage": "0",
+      "isShort": false
+    },
+    {
+      "itemCode": "CON-OIL",
+      "itemName": "Cutting oil",
+      "uom": "LTR",
+      "required": "6",
+      "available": "4",
+      "shortage": "2",
+      "isShort": true
+    }
+  ],
+  "jobCards": [
+    {
+      "seqNo": 10,
+      "operationName": "Turning",
+      "workCentre": "CNC lathe 1",
+      "operator": "Suresh Patil",
+      "status": "DONE",
+      "statusLabel": "Done",
+      "minutesWorked": 420,
+      "goodQty": "42",
+      "rejectedQty": "0",
+      "pauseReason": ""
+    },
+    {
+      "seqNo": 20,
+      "operationName": "Grinding",
+      "workCentre": "Cylindrical grinder",
+      "operator": "Anil Jadhav",
+      "status": "PAUSED",
+      "statusLabel": "Paused",
+      "minutesWorked": 180,
+      "goodQty": "40",
+      "rejectedQty": "2",
+      "pauseReason": "Wheel dressing"
+    },
+    {
+      "seqNo": 30,
+      "operationName": "Final inspection",
+      "workCentre": "QC bench",
+      "operator": "",
+      "status": "PENDING",
+      "statusLabel": "Pending",
+      "minutesWorked": 0,
+      "goodQty": "0",
+      "rejectedQty": "0",
+      "pauseReason": ""
+    }
+  ]
+}

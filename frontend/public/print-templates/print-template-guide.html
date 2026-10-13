@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Print templates: placeholder guide</title>
+  <style>
+body{font-family:Segoe UI,Arial,sans-serif;max-width:980px;margin:24px auto;padding:0 16px;color:#1f2430;line-height:1.5}
+table{border-collapse:collapse;width:100%;margin:10px 0 20px}th,td{border:1px solid #d6d9e0;padding:6px 8px;text-align:left;vertical-align:top}
+th{background:#eef0f8}code{background:#f3f4f8;padding:1px 4px;border-radius:4px}h1,h2{color:#312e81}
+</style>
+</head>
+<body>
+
+<h1 id="print-templates-placeholder-guide">Print templates: placeholder
+guide</h1>
+<p>Every saved document in Endustry ERP has <strong>Print</strong> and
+<strong>Download PDF</strong> buttons at the bottom of its page:
+quotations, sales orders, invoices, purchase orders, goods receipts,
+vendor invoices and work orders (with their job cards).</p>
+<p>They print with the <strong>standard layout</strong> unless your
+company uploads its own. To use your own layout:</p>
+<ol type="1">
+<li>Go to <strong>Settings &gt; Print templates</strong>.</li>
+<li>Download the <strong>sample template</strong> (a classic bordered
+GST invoice), or the <strong>standard layout</strong> of the document
+you want to change.</li>
+<li>Edit the HTML file in any text editor. Keep the
+<code>{{placeholders}}</code> you need.</li>
+<li>Click <strong>Upload template</strong>, choose the file, pick the
+document it is for, and press <strong>Preview</strong> to see it filled
+with your latest real document.</li>
+<li>Tick <strong>Use this layout whenever this document is
+printed</strong>, or leave it unticked to pick it from the layout list
+beside the Print button.</li>
+</ol>
+<p>You can go back to the standard layout at any time from the
+<strong>Prints with</strong> column.</p>
+<h2 id="how-placeholders-work">How placeholders work</h2>
+<p>Templates use <a
+href="https://mustache.github.io/mustache.5.html">Mustache</a>
+placeholders.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>You write</th>
+<th>You get</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>{{document.number}}</code></td>
+<td>The value, e.g. <code>INV/26-27/0042</code>. Text is made safe for
+HTML automatically.</td>
+</tr>
+<tr class="even">
+<td><code>{{#lines}} ... {{/lines}}</code></td>
+<td>The part in between, repeated for each line item. Inside it, use the
+line’s fields directly: <code>{{itemName}}</code>,
+<code>{{qty}}</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>{{#party.gstin}} ... {{/party.gstin}}</code></td>
+<td>The part in between only when the field has a value (or is
+<code>true</code>).</td>
+</tr>
+<tr class="even">
+<td><code>{{^party.gstin}}Unregistered{{/party.gstin}}</code></td>
+<td>The part in between only when the field is empty (or
+<code>false</code>).</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Amounts arrive already formatted with Indian grouping and two
+decimals (<code>12,34,567.00</code>), without the rupee sign. Add
+<code>&amp;#8377;</code> where you want ₹.</li>
+<li>Dates arrive as <code>DD-MM-YYYY</code>. An empty date is an empty
+string.</li>
+<li>Page size and margins:
+<code>@page { size: A4; margin: 12mm; }</code>. Landscape:
+<code>size: A4 landscape;</code>. Page numbers:
+<code>@page { @bottom-right { content: "Page " counter(page) " of " counter(pages); } }</code>.</li>
+<li>Font: <strong>DejaVu Sans</strong> is built in and prints the ₹
+sign. Common names (Arial, Helvetica, sans-serif) are mapped to it.</li>
+<li>Layout: use tables for columns. The PDF engine supports CSS 2.1 plus
+some CSS 3 (borders, backgrounds, <code>@page</code>); it does not
+support flexbox or grid.</li>
+<li>Logo: embed it as a data URI,
+<code>&lt;img src="data:image/png;base64,..."&gt;</code>. Links to
+images on the internet are not loaded.</li>
+<li>Scripts do not run.</li>
+<li>Maximum file size is 3 MB including embedded images.</li>
+</ul>
+<p>A template that has a placeholder mistake (for example a
+<code>{{#lines}}</code> with no <code>{{/lines}}</code>) is refused when
+you save it, with the reason.</p>
+<h2 id="data-for-quotations-orders-goods-receipts-and-invoices">Data for
+quotations, orders, goods receipts and invoices</h2>
+<p>Document types: <code>QUOTATION</code>, <code>SALES_ORDER</code>,
+<code>SALES_INVOICE</code>, <code>PURCHASE_ORDER</code>,
+<code>GRN</code>, <code>PURCHASE_INVOICE</code>. A full example is in
+<code>sample-document-data.json</code> (also <strong>Sample
+data</strong> in the app, which uses your latest real document).</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Example</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>documentType</code></td>
+<td><code>SALES_INVOICE</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>documentTitle</code></td>
+<td><code>Tax Invoice</code></td>
+<td>Quotation, Sales Order, Tax Invoice, Purchase Order, Goods Receipt
+Note, Purchase Invoice</td>
+</tr>
+<tr class="odd">
+<td><code>printedAt</code></td>
+<td><code>10-10-2026 11:30</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><strong>company</strong></td>
+<td></td>
+<td>Your company, from Settings &gt; Company</td>
+</tr>
+<tr class="odd">
+<td><code>company.legalName</code>, <code>tradeName</code>,
+<code>displayName</code></td>
+<td><code>Shree Precision</code></td>
+<td><code>displayName</code> is the trade name, or the legal name when
+there is none</td>
+</tr>
+<tr class="even">
+<td><code>company.gstin</code>, <code>pan</code>,
+<code>udyamNumber</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>company.addressLine</code></td>
+<td><code>Plot 14, MIDC Bhosari, Pune - 411026</code></td>
+<td>Address, city and PIN joined, leaving out blanks</td>
+</tr>
+<tr class="even">
+<td><code>company.address</code>, <code>city</code>,
+<code>pincode</code>, <code>stateCode</code>, <code>phone</code>,
+<code>email</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><strong>document</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>document.number</code></td>
+<td><code>INV/26-27/0042</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>document.date</code></td>
+<td><code>08-10-2026</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>document.dueDate</code>, <code>document.dueLabel</code></td>
+<td><code>07-11-2026</code>, <code>Due date</code></td>
+<td>Label differs per type: Valid until, Delivery date, Expected by, Pay
+by</td>
+</tr>
+<tr class="odd">
+<td><code>document.referenceNo</code>,
+<code>document.referenceLabel</code></td>
+<td><code>PO-7781</code>, <code>Customer PO no</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>document.status</code>, <code>statusLabel</code></td>
+<td><code>POSTED</code>, <code>Posted</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>document.isDraft</code>, <code>isCancelled</code></td>
+<td><code>true</code> / <code>false</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>document.placeOfSupply</code></td>
+<td><code>27</code></td>
+<td>GST state code</td>
+</tr>
+<tr class="odd">
+<td><code>document.sourceNumber</code></td>
+<td><code>SO/26-27/0031</code></td>
+<td>The document this one was raised from</td>
+</tr>
+<tr class="even">
+<td><code>document.warehouse</code>, <code>notes</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>document.ewayBillRequired</code></td>
+<td><code>true</code> / <code>false</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><strong>party</strong></td>
+<td></td>
+<td>Customer or vendor</td>
+</tr>
+<tr class="odd">
+<td><code>party.label</code>, <code>billToLabel</code></td>
+<td><code>Customer</code>, <code>Bill to</code></td>
+<td><code>Vendor</code>, <code>Vendor</code> on purchase documents</td>
+</tr>
+<tr class="even">
+<td><code>party.code</code>, <code>name</code>, <code>gstin</code>,
+<code>pan</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>party.addressLine</code></td>
+<td><code>Udyog Bhavan, Hadapsar, Pune - 411013</code></td>
+<td>As for the company</td>
+</tr>
+<tr class="even">
+<td><code>party.address</code>, <code>city</code>, <code>pincode</code>,
+<code>stateCode</code>, <code>contactPerson</code>, <code>phone</code>,
+<code>email</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><strong>lines</strong> (list)</td>
+<td></td>
+<td>One entry per line item</td>
+</tr>
+<tr class="even">
+<td><code>lineNo</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>itemCode</code>, <code>itemName</code>,
+<code>description</code>, <code>hsnCode</code>,
+<code>batchNo</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>qty</code>, <code>uom</code></td>
+<td><code>10</code>, <code>NOS</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>rate</code>, <code>discountPct</code>,
+<code>hasDiscount</code>, <code>taxRatePct</code></td>
+<td><code>1,000.00</code>, <code>10</code>, <code>true</code>,
+<code>18</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>taxableAmount</code></td>
+<td><code>9,000.00</code></td>
+<td>After discount, before tax</td>
+</tr>
+<tr class="odd">
+<td><code>cgstAmount</code>, <code>sgstAmount</code>,
+<code>igstAmount</code>, <code>taxAmount</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>lineTotal</code></td>
+<td><code>10,620.00</code></td>
+<td>Including tax</td>
+</tr>
+<tr class="odd">
+<td><strong>taxSummary</strong> (list)</td>
+<td></td>
+<td>One entry per HSN code and GST rate</td>
+</tr>
+<tr class="even">
+<td><code>hsnCode</code>, <code>taxRatePct</code>,
+<code>taxableAmount</code>, <code>cgstAmount</code>,
+<code>sgstAmount</code>, <code>igstAmount</code>,
+<code>taxAmount</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><strong>totals</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>totals.subTotal</code>, <code>discountTotal</code>,
+<code>hasDiscount</code>, <code>taxableTotal</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>totals.interState</code></td>
+<td><code>false</code></td>
+<td><code>true</code> when IGST applies instead of CGST + SGST</td>
+</tr>
+<tr class="even">
+<td><code>totals.cgst</code>, <code>sgst</code>, <code>igst</code>,
+<code>taxTotal</code>, <code>grandTotal</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>totals.paidAmount</code>, <code>balance</code>,
+<code>hasPayments</code></td>
+<td></td>
+<td>Payments recorded against an invoice</td>
+</tr>
+<tr class="even">
+<td><code>totals.amountInWords</code></td>
+<td><code>Rupees Seventeen Thousand Seven Hundred Only</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="data-for-work-orders-and-job-cards">Data for work orders and job
+cards</h2>
+<p>Document type <code>WORK_ORDER</code>. A full example is in
+<code>sample-work-order-data.json</code>.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>documentType</code>, <code>documentTitle</code>,
+<code>printedAt</code>, <code>company.*</code></td>
+<td>As above</td>
+</tr>
+<tr class="even">
+<td><code>document.number</code>, <code>status</code>,
+<code>statusLabel</code>, <code>isDraft</code>,
+<code>isCancelled</code></td>
+<td><code>isDraft</code> is true while the order is only planned</td>
+</tr>
+<tr class="odd">
+<td><code>document.startDate</code>, <code>dueDate</code>,
+<code>completedDate</code>, <code>salesOrderNo</code>,
+<code>warehouse</code>, <code>bomVersion</code>, <code>notes</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>item.code</code>, <code>item.name</code>,
+<code>item.uom</code></td>
+<td>The product being made</td>
+</tr>
+<tr class="odd">
+<td><code>quantities.planned</code>, <code>produced</code>,
+<code>rejected</code>, <code>remaining</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>costs.standardUnitCost</code>, <code>materialCost</code>,
+<code>operationCost</code>, <code>actualUnitCost</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><strong>materials</strong> (list): <code>itemCode</code>,
+<code>itemName</code>, <code>uom</code>, <code>required</code>,
+<code>available</code>, <code>shortage</code>, <code>isShort</code></td>
+<td>Material still needed for the remaining quantity</td>
+</tr>
+<tr class="even">
+<td><strong>jobCards</strong> (list): <code>seqNo</code>,
+<code>operationName</code>, <code>workCentre</code>,
+<code>operator</code>, <code>status</code>, <code>statusLabel</code>,
+<code>minutesWorked</code>, <code>goodQty</code>,
+<code>rejectedQty</code>, <code>pauseReason</code></td>
+<td>One per routing step</td>
+</tr>
+</tbody>
+</table>
+<h2 id="for-developers">For developers</h2>
+<ul>
+<li>Print: <code>GET /api/{module}/docs/{kind}/{id}/print</code> (PDF;
+<code>?download=true</code> for an attachment; <code>?templateId=</code>
+to pick a template, <code>0</code> for the standard layout). Work
+orders: <code>GET /api/production/work-orders/{id}/print</code>.</li>
+<li>The JSON a template receives: the same paths ending in
+<code>/print-data</code>.</li>
+<li>Templates: <code>/api/settings/print-templates</code> (list, create,
+update, delete), <code>/types</code>, <code>/default/{docType}</code>,
+<code>/built-in/{docType}</code>, <code>/sample-data/{docType}</code>,
+<code>POST /preview</code>.</li>
+<li>Code: <code>backend/src/main/java/com/endustry/erp/printing</code>.
+Standard layouts:
+<code>backend/src/main/resources/print-templates</code>.</li>
+</ul>
+</body>
+</html>

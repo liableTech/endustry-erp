@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Bill of material {{document.number}}</title>
+<!--
+  Endustry ERP built-in layout for a bill of material: what one run makes, the components that
+  go into it, the routing and the standard cost. Copy this file to make your own. The data is
+  described in docs/print-templates/README.md.
+-->
+<style>
+  @page {
+    size: A4;
+    margin: 14mm 12mm 16mm 12mm;
+    @bottom-left { content: "Bill of material {{document.number}}"; font-family: "DejaVu Sans"; font-size: 7.5pt; color: #777; }
+    @bottom-right { content: "Page " counter(page) " of " counter(pages); font-family: "DejaVu Sans"; font-size: 7.5pt; color: #777; }
+  }
+  body { font-family: "DejaVu Sans", sans-serif; font-size: 8.5pt; color: #1f2430; margin: 0; }
+  table { border-collapse: collapse; width: 100%; }
+  td, th { vertical-align: top; }
+  .muted { color: #6b7280; }
+  .right { text-align: right; }
+  .strong { font-weight: bold; }
+  .company-name { font-size: 14pt; font-weight: bold; color: #312e81; }
+  .title { font-size: 13pt; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #312e81; }
+  .badge { display: inline-block; border: 1px solid #312e81; color: #312e81; padding: 1px 6px; font-size: 8pt; font-weight: bold; margin-top: 4px; }
+  .rule { border-bottom: 2px solid #312e81; margin: 8px 0 10px 0; }
+  .box { border: 1px solid #d6d9e0; padding: 7px 9px; }
+  .label { font-size: 7pt; text-transform: uppercase; letter-spacing: 0.6px; color: #6b7280; margin-bottom: 3px; }
+  .meta td { padding: 1.5px 0; }
+  .meta td.k { color: #6b7280; width: 45%; }
+  .cost td { border: 1px solid #d6d9e0; padding: 6px; text-align: center; width: 25%; }
+  .cost .n { font-size: 11pt; font-weight: bold; }
+  h3 { font-size: 9pt; text-transform: uppercase; letter-spacing: 0.8px; color: #312e81; margin: 14px 0 4px 0; }
+  .grid { -fs-table-paginate: paginate; }
+  .grid thead { display: table-header-group; }
+  .grid th { background: #eef0f8; color: #312e81; font-size: 7.5pt; text-transform: uppercase; padding: 5px 4px; border-bottom: 1px solid #c7cbe0; text-align: left; }
+  .grid th.right { text-align: right; }
+  .grid td { padding: 6px 4px; border-bottom: 1px solid #e5e7eb; }
+  .grid tr { page-break-inside: avoid; }
+  .write { border-bottom: 1px solid #9ca3af; height: 16px; }
+</style>
+</head>
+<body>
+
+<table>
+  <tr>
+    <td style="width: 60%;">
+      <div class="company-name">{{company.displayName}}</div>
+      <div class="muted">{{company.addressLine}}</div>
+    </td>
+    <td class="right">
+      <div class="title">Bill of material</div>
+      <div style="font-size: 11pt;" class="strong">{{document.number}}</div>
+      <div class="badge">{{document.statusLabel}}</div>
+    </td>
+  </tr>
+</table>
+<div class="rule"></div>
+
+<table>
+  <tr>
+    <td class="box" style="width: 55%;">
+      <div class="label">Product</div>
+      <div class="strong" style="font-size: 10.5pt;">{{item.name}}</div>
+      <div class="muted">{{item.code}}</div>
+    </td>
+    <td style="width: 10px;"></td>
+    <td class="box">
+      <table class="meta">
+        <tr><td class="k">Version</td><td class="strong">{{document.version}}</td></tr>
+        <tr><td class="k">Status</td><td class="strong">{{document.statusLabel}}</td></tr>
+        <tr><td class="k">One run makes</td><td class="strong">{{document.outputQty}} {{item.uom}}</td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<table class="cost" style="margin-top: 10px;">
+  <tr>
+    <td><div class="label">Material cost</div><div class="n">{{costs.materialCost}}</div></td>
+    <td><div class="label">Operation cost</div><div class="n">{{costs.operationCost}}</div></td>
+    <td><div class="label">Cost of one run</div><div class="n">{{costs.totalCost}}</div></td>
+    <td><div class="label">Cost per {{item.uom}}</div><div class="n">{{costs.unitCost}}</div></td>
+  </tr>
+</table>
+
+<h3>Components for {{document.outputQty}} {{item.uom}}</h3>
+<table class="grid">
+  <thead><tr><th style="width: 5%;">#</th><th>Component</th><th class="right">Quantity</th><th class="right">Scrap</th></tr></thead>
+  <tbody>
+    {{#components}}
+    <tr>
+      <td class="muted">{{lineNo}}</td>
+      <td><span class="strong">{{itemName}}</span><br /><span class="muted">{{itemCode}}</span></td>
+      <td class="right">{{qty}} {{uom}}</td>
+      <td class="right">{{#hasScrap}}{{scrapPct}}%{{/hasScrap}}{{^hasScrap}}<span class="muted">-</span>{{/hasScrap}}</td>
+    </tr>
+    {{/components}}
+    {{^components}}<tr><td colspan="4" class="muted">No components.</td></tr>{{/components}}
+  </tbody>
+</table>
+
+<h3>Operations</h3>
+<table class="grid">
+  <thead><tr><th style="width: 6%;">Step</th><th>Operation</th><th>Machine</th><th class="right">Setup minutes</th><th class="right">Run minutes per unit</th></tr></thead>
+  <tbody>
+    {{#operations}}
+    <tr>
+      <td class="strong">{{seqNo}}</td>
+      <td class="strong">{{name}}</td>
+      <td>{{workCentre}}</td>
+      <td class="right">{{setupMinutes}}</td>
+      <td class="right">{{runMinutesPerUnit}}</td>
+    </tr>
+    {{/operations}}
+    {{^operations}}<tr><td colspan="5" class="muted">No operations defined.</td></tr>{{/operations}}
+  </tbody>
+</table>
+
+{{#document.notes}}<h3>Notes</h3><div>{{document.notes}}</div>{{/document.notes}}
+
+<table style="margin-top: 26px;">
+  <tr>
+    <td style="width: 33%;"><div class="write"></div><div class="muted">Prepared by</div></td>
+    <td style="width: 34%; padding: 0 14px;"><div class="write"></div><div class="muted">Checked by</div></td>
+    <td><div class="write"></div><div class="muted">Approved by</div></td>
+  </tr>
+</table>
+
+<div class="muted" style="margin-top: 10px;">Printed {{printedAt}}</div>
+
+</body>
+</html>

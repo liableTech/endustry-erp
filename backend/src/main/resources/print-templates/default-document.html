@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>{{documentTitle}} {{document.number}}</title>
+<!--
+  Endustry ERP built-in layout for quotations, orders, goods receipts and invoices.
+  Copy this file to make your own: change anything, keep the {{placeholders}} you need.
+  The data it is filled from is described in docs/print-templates/README.md.
+-->
+<style>
+  @page {
+    size: A4;
+    margin: 14mm 12mm 16mm 12mm;
+    @bottom-left { content: "{{documentTitle}} {{document.number}}"; font-family: "DejaVu Sans"; font-size: 7.5pt; color: #777; }
+    @bottom-right { content: "Page " counter(page) " of " counter(pages); font-family: "DejaVu Sans"; font-size: 7.5pt; color: #777; }
+  }
+  body { font-family: "DejaVu Sans", sans-serif; font-size: 8.5pt; color: #1f2430; margin: 0; }
+  table { border-collapse: collapse; width: 100%; }
+  td, th { vertical-align: top; }
+  .muted { color: #6b7280; }
+  .right { text-align: right; }
+  .center { text-align: center; }
+  .strong { font-weight: bold; }
+
+  .head td { padding: 0; }
+  .company-name { font-size: 15pt; font-weight: bold; color: #312e81; }
+  .title { font-size: 13pt; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; color: #312e81; }
+  .badge { display: inline-block; border: 1px solid #b91c1c; color: #b91c1c; padding: 1px 6px; font-size: 8pt; font-weight: bold; margin-top: 4px; }
+  .rule { border-bottom: 2px solid #312e81; margin: 8px 0 10px 0; }
+
+  .boxes td.box { border: 1px solid #d6d9e0; padding: 7px 9px; width: 50%; }
+  .label { font-size: 7pt; text-transform: uppercase; letter-spacing: 0.6px; color: #6b7280; margin-bottom: 3px; }
+  .meta td { padding: 1.5px 0; }
+  .meta td.k { color: #6b7280; width: 42%; }
+
+  .lines { margin-top: 10px; -fs-table-paginate: paginate; }
+  .lines thead { display: table-header-group; }
+  .lines th { background: #eef0f8; color: #312e81; font-size: 7.5pt; text-transform: uppercase; padding: 5px 4px; border-bottom: 1px solid #c7cbe0; text-align: left; }
+  .lines th.right { text-align: right; }
+  .lines td { padding: 5px 4px; border-bottom: 1px solid #e5e7eb; }
+  .lines tr { page-break-inside: avoid; }
+
+  .totals { width: 46%; margin-left: 54%; margin-top: 8px; }
+  .totals td { padding: 3px 4px; }
+  .totals tr.grand td { border-top: 1.5px solid #312e81; font-size: 10.5pt; font-weight: bold; color: #312e81; padding-top: 5px; }
+  .words { margin-top: 8px; padding: 6px 9px; background: #f6f7fb; border-left: 3px solid #312e81; }
+
+  .summary { margin-top: 12px; }
+  .summary th { font-size: 7pt; text-transform: uppercase; color: #6b7280; border-bottom: 1px solid #d6d9e0; padding: 3px 4px; text-align: right; }
+  .summary th:first-child { text-align: left; }
+  .summary td { padding: 3px 4px; text-align: right; border-bottom: 1px solid #f0f1f4; }
+  .summary td:first-child { text-align: left; }
+
+  .foot { margin-top: 16px; page-break-inside: avoid; }
+  .sign { text-align: right; }
+  .sign .space { height: 42px; }
+</style>
+</head>
+<body>
+
+<table class="head">
+  <tr>
+    <td style="width: 60%;">
+      <div class="company-name">{{company.displayName}}</div>
+      {{#company.tradeName}}<div class="muted">{{company.legalName}}</div>{{/company.tradeName}}
+      <div>{{company.addressLine}}</div>
+      <div>
+        {{#company.gstin}}GSTIN <span class="strong">{{company.gstin}}</span>{{/company.gstin}}
+        {{#company.pan}} &#160; PAN {{company.pan}}{{/company.pan}}
+        {{#company.stateCode}} &#160; State code {{company.stateCode}}{{/company.stateCode}}
+      </div>
+      <div class="muted">{{#company.phone}}Phone {{company.phone}}{{/company.phone}}{{#company.email}} &#160; {{company.email}}{{/company.email}}</div>
+      {{#company.udyamNumber}}<div class="muted">Udyam {{company.udyamNumber}}</div>{{/company.udyamNumber}}
+    </td>
+    <td class="right">
+      <div class="title">{{documentTitle}}</div>
+      <div style="font-size: 11pt;" class="strong">{{document.number}}</div>
+      {{#document.isDraft}}<div class="badge">DRAFT</div>{{/document.isDraft}}
+      {{#document.isCancelled}}<div class="badge">CANCELLED</div>{{/document.isCancelled}}
+    </td>
+  </tr>
+</table>
+<div class="rule"></div>
+
+<table class="boxes">
+  <tr>
+    <td class="box">
+      <div class="label">{{party.billToLabel}}</div>
+      <div class="strong" style="font-size: 10pt;">{{party.name}}</div>
+      {{#party.addressLine}}<div>{{party.addressLine}}</div>{{/party.addressLine}}
+      <div>GSTIN {{#party.gstin}}<span class="strong">{{party.gstin}}</span>{{/party.gstin}}{{^party.gstin}}Unregistered{{/party.gstin}}{{#party.stateCode}} &#160; State code {{party.stateCode}}{{/party.stateCode}}</div>
+      {{#party.contactPerson}}<div class="muted">Attn: {{party.contactPerson}}{{#party.phone}}, {{party.phone}}{{/party.phone}}</div>{{/party.contactPerson}}
+      {{^party.contactPerson}}{{#party.phone}}<div class="muted">Phone {{party.phone}}</div>{{/party.phone}}{{/party.contactPerson}}
+    </td>
+    <td style="width: 10px;"></td>
+    <td class="box">
+      <table class="meta">
+        <tr><td class="k">Date</td><td class="strong">{{document.date}}</td></tr>
+        {{#document.dueDate}}<tr><td class="k">{{document.dueLabel}}</td><td>{{document.dueDate}}</td></tr>{{/document.dueDate}}
+        {{#document.referenceNo}}<tr><td class="k">{{document.referenceLabel}}</td><td>{{document.referenceNo}}</td></tr>{{/document.referenceNo}}
+        {{#document.sourceNumber}}<tr><td class="k">Against</td><td>{{document.sourceNumber}}</td></tr>{{/document.sourceNumber}}
+        {{#document.placeOfSupply}}<tr><td class="k">Place of supply</td><td>State {{document.placeOfSupply}}</td></tr>{{/document.placeOfSupply}}
+        {{#document.warehouse}}<tr><td class="k">Warehouse</td><td>{{document.warehouse}}</td></tr>{{/document.warehouse}}
+      </table>
+    </td>
+  </tr>
+</table>
+
+<table class="lines">
+  <thead>
+    <tr>
+      <th style="width: 4%;">#</th>
+      <th>Item</th>
+      <th style="width: 9%;">HSN</th>
+      <th class="right" style="width: 10%;">Qty</th>
+      <th class="right" style="width: 11%;">Rate</th>
+      <th class="right" style="width: 7%;">Disc %</th>
+      <th class="right" style="width: 7%;">GST %</th>
+      <th class="right" style="width: 14%;">Amount</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#lines}}
+    <tr>
+      <td class="muted">{{lineNo}}</td>
+      <td><span class="strong">{{itemName}}</span><br /><span class="muted">{{itemCode}}{{#batchNo}} &#183; Batch {{batchNo}}{{/batchNo}}</span>{{#description}}<br />{{description}}{{/description}}</td>
+      <td>{{hsnCode}}</td>
+      <td class="right">{{qty}} {{uom}}</td>
+      <td class="right">{{rate}}</td>
+      <td class="right">{{discountPct}}</td>
+      <td class="right">{{taxRatePct}}</td>
+      <td class="right strong">{{taxableAmount}}</td>
+    </tr>
+    {{/lines}}
+  </tbody>
+</table>
+
+<table class="totals">
+  <tr><td class="muted">Sub total</td><td class="right">&#8377; {{totals.subTotal}}</td></tr>
+  {{#totals.hasDiscount}}<tr><td class="muted">Discount</td><td class="right">- &#8377; {{totals.discountTotal}}</td></tr>{{/totals.hasDiscount}}
+  <tr><td class="muted">Taxable value</td><td class="right">&#8377; {{totals.taxableTotal}}</td></tr>
+  {{#totals.interState}}<tr><td class="muted">IGST</td><td class="right">&#8377; {{totals.igst}}</td></tr>{{/totals.interState}}
+  {{^totals.interState}}
+  <tr><td class="muted">CGST</td><td class="right">&#8377; {{totals.cgst}}</td></tr>
+  <tr><td class="muted">SGST</td><td class="right">&#8377; {{totals.sgst}}</td></tr>
+  {{/totals.interState}}
+  <tr class="grand"><td>Total</td><td class="right">&#8377; {{totals.grandTotal}}</td></tr>
+  {{#totals.hasPayments}}
+  <tr><td class="muted">Paid</td><td class="right">&#8377; {{totals.paidAmount}}</td></tr>
+  <tr><td class="strong">Balance due</td><td class="right strong">&#8377; {{totals.balance}}</td></tr>
+  {{/totals.hasPayments}}
+</table>
+
+<div class="words"><span class="muted">Amount in words:</span> <span class="strong">{{totals.amountInWords}}</span></div>
+
+<table class="summary">
+  <tr>
+    <th>HSN / SAC</th><th>Taxable value</th><th>GST %</th>
+    {{#totals.interState}}<th>IGST</th>{{/totals.interState}}
+    {{^totals.interState}}<th>CGST</th><th>SGST</th>{{/totals.interState}}
+    <th>Total tax</th>
+  </tr>
+  {{#taxSummary}}
+  <tr>
+    <td>{{hsnCode}}</td><td>{{taxableAmount}}</td><td>{{taxRatePct}}</td>
+    {{#totals.interState}}<td>{{igstAmount}}</td>{{/totals.interState}}
+    {{^totals.interState}}<td>{{cgstAmount}}</td><td>{{sgstAmount}}</td>{{/totals.interState}}
+    <td>{{taxAmount}}</td>
+  </tr>
+  {{/taxSummary}}
+</table>
+
+<table class="foot">
+  <tr>
+    <td style="width: 60%;">
+      {{#document.notes}}<div class="label">Notes</div><div>{{document.notes}}</div>{{/document.notes}}
+      {{#document.ewayBillRequired}}<div class="muted" style="margin-top: 6px;">E-way bill required for this consignment.</div>{{/document.ewayBillRequired}}
+      <div class="muted" style="margin-top: 10px;">This is a computer-generated document.</div>
+    </td>
+    <td class="sign">
+      <div>For <span class="strong">{{company.displayName}}</span></div>
+      <div class="space"></div>
+      <div class="muted">Authorised signatory</div>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

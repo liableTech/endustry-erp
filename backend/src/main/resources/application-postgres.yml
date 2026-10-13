@@ -1,0 +1,6 @@
+# Activate with: --spring.profiles.active=postgres
+spring:
+  datasource:
+    url: ${ERP_DB_URL:jdbc:postgresql://localhost:5432/endustry}
+    username: ${ERP_DB_USER:endustry}
+    password: ${ERP_DB_PASSWORD:}

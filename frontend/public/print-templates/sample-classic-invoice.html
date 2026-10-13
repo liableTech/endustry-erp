@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>{{documentTitle}} {{document.number}}</title>
+<!--
+  SAMPLE CUSTOM TEMPLATE - "Classic GST invoice"
+  ------------------------------------------------
+  Upload this in Settings > Print templates to try it, then change it to suit your company.
+
+  How it works
+  * Everything in {{double braces}} is filled from the document's data (JSON). See
+    print-template-guide.html (next to this file) or "Download sample data" in the app for every field.
+  * {{#lines}} ... {{/lines}} repeats once per line item.
+  * {{#field}} ... {{/field}} shows the part only when the field has a value / is true.
+    {{^field}} ... {{/field}} shows it only when the field is empty / false.
+  * Amounts arrive already formatted (12,34,567.00). Put the rupee sign where you want it: &#8377;
+  * Logo: paste your logo as a data URI, e.g. <img src="data:image/png;base64,iVBORw0..." />.
+    Links to images on the internet are not loaded.
+  * Page size and margins are set in @page below. Fonts: "DejaVu Sans" (built in, has the rupee sign).
+  * Edit the bank details and terms below; they are plain text in this file.
+-->
+<style>
+  @page { size: A4; margin: 10mm; }
+  body { font-family: "DejaVu Sans", sans-serif; font-size: 8pt; color: #000; }
+  table { border-collapse: collapse; width: 100%; }
+  td, th { border: 1px solid #000; padding: 4px 5px; vertical-align: top; }
+  .noborder td { border: none; padding: 0; }
+  .c { text-align: center; }
+  .r { text-align: right; }
+  .b { font-weight: bold; }
+  .title { font-size: 14pt; font-weight: bold; text-align: center; padding: 6px; letter-spacing: 2px; }
+  .small { font-size: 7pt; }
+  th { background: #e8e8e8; font-size: 7.5pt; }
+  .lines thead { display: table-header-group; }
+  .lines { -fs-table-paginate: paginate; }
+  .lines tr { page-break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<table>
+  <tr><td colspan="2" class="title">{{documentTitle}}{{#document.isDraft}} (DRAFT){{/document.isDraft}}</td></tr>
+  <tr>
+    <td style="width: 55%;">
+      <!-- Replace this comment with your logo: <img src="data:image/png;base64,..." style="height: 40px;" /> -->
+      <div class="b" style="font-size: 12pt;">{{company.legalName}}</div>
+      <div>{{company.addressLine}}</div>
+      <div>GSTIN/UIN: <span class="b">{{company.gstin}}</span></div>
+      <div>State code: {{company.stateCode}} &#160; PAN: {{company.pan}}</div>
+      <div>Phone: {{company.phone}} &#160; Email: {{company.email}}</div>
+    </td>
+    <td>
+      <table class="noborder">
+        <tr><td style="width: 45%;">Number</td><td class="b">{{document.number}}</td></tr>
+        <tr><td>Date</td><td class="b">{{document.date}}</td></tr>
+        {{#document.referenceNo}}<tr><td>{{document.referenceLabel}}</td><td>{{document.referenceNo}}</td></tr>{{/document.referenceNo}}
+        {{#document.sourceNumber}}<tr><td>Against</td><td>{{document.sourceNumber}}</td></tr>{{/document.sourceNumber}}
+        {{#document.dueDate}}<tr><td>{{document.dueLabel}}</td><td>{{document.dueDate}}</td></tr>{{/document.dueDate}}
+        <tr><td>Place of supply</td><td>{{document.placeOfSupply}}</td></tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <div class="small b">{{party.billToLabel}}:</div>
+      <div class="b" style="font-size: 10pt;">{{party.name}}</div>
+      {{#party.addressLine}}<div>{{party.addressLine}}</div>{{/party.addressLine}}
+      <div>GSTIN/UIN: {{#party.gstin}}{{party.gstin}}{{/party.gstin}}{{^party.gstin}}Unregistered{{/party.gstin}} &#160; State code: {{party.stateCode}}</div>
+    </td>
+  </tr>
+</table>
+
+<table class="lines" style="margin-top: -1px;">
+  <thead>
+    <tr>
+      <th style="width: 4%;">Sr</th>
+      <th>Description of goods</th>
+      <th style="width: 8%;">HSN</th>
+      <th style="width: 9%;">Qty</th>
+      <th style="width: 9%;">Rate</th>
+      <th style="width: 6%;">Disc%</th>
+      <th style="width: 11%;">Taxable</th>
+      {{#totals.interState}}<th style="width: 10%;">IGST</th>{{/totals.interState}}
+      {{^totals.interState}}<th style="width: 9%;">CGST</th><th style="width: 9%;">SGST</th>{{/totals.interState}}
+      <th style="width: 11%;">Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#lines}}
+    <tr>
+      <td class="c">{{lineNo}}</td>
+      <td><span class="b">{{itemName}}</span> ({{itemCode}}){{#description}}<br />{{description}}{{/description}}{{#batchNo}}<br />Batch: {{batchNo}}{{/batchNo}}</td>
+      <td class="c">{{hsnCode}}</td>
+      <td class="r">{{qty}} {{uom}}</td>
+      <td class="r">{{rate}}</td>
+      <td class="r">{{discountPct}}</td>
+      <td class="r">{{taxableAmount}}</td>
+      {{#totals.interState}}<td class="r">{{igstAmount}}<br /><span class="small">@{{taxRatePct}}%</span></td>{{/totals.interState}}
+      {{^totals.interState}}<td class="r">{{cgstAmount}}</td><td class="r">{{sgstAmount}}</td>{{/totals.interState}}
+      <td class="r b">{{lineTotal}}</td>
+    </tr>
+    {{/lines}}
+  </tbody>
+</table>
+
+<table style="margin-top: -1px;">
+  <tr>
+    <td style="width: 60%;">
+      <div class="small">Amount chargeable (in words)</div>
+      <div class="b">{{totals.amountInWords}}</div>
+      <div style="margin-top: 8px;" class="small b">Bank details</div>
+      <div class="small">Bank: YOUR BANK NAME &#160; A/c no: 000000000000 &#160; IFSC: ABCD0000000</div>
+    </td>
+    <td>
+      <table class="noborder">
+        <tr><td>Taxable value</td><td class="r">&#8377; {{totals.taxableTotal}}</td></tr>
+        {{#totals.interState}}<tr><td>IGST</td><td class="r">&#8377; {{totals.igst}}</td></tr>{{/totals.interState}}
+        {{^totals.interState}}<tr><td>CGST</td><td class="r">&#8377; {{totals.cgst}}</td></tr><tr><td>SGST</td><td class="r">&#8377; {{totals.sgst}}</td></tr>{{/totals.interState}}
+        <tr><td class="b" style="font-size: 10pt; padding-top: 4px;">Grand total</td><td class="r b" style="font-size: 10pt; padding-top: 4px;">&#8377; {{totals.grandTotal}}</td></tr>
+        {{#totals.hasPayments}}<tr><td>Balance due</td><td class="r b">&#8377; {{totals.balance}}</td></tr>{{/totals.hasPayments}}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div class="small b">Terms and conditions</div>
+      <div class="small">1. Interest at 18% p.a. is charged on payments made after the due date.</div>
+      <div class="small">2. Subject to local jurisdiction.</div>
+      {{#document.notes}}<div class="small" style="margin-top: 4px;">Note: {{document.notes}}</div>{{/document.notes}}
+    </td>
+    <td class="r">
+      <div>for <span class="b">{{company.legalName}}</span></div>
+      <div style="height: 40px;"></div>
+      <div>Authorised signatory</div>
+    </td>
+  </tr>
+</table>
+<div class="c small" style="margin-top: 4px;">This is a computer-generated {{documentTitle}}.</div>
+
+</body>
+</html>

@@ -1,0 +1,39 @@
+{
+  "documentType": "BOM",
+  "documentTitle": "Bill of Material",
+  "company": {
+    "legalName": "Shree Precision Components Pvt Ltd",
+    "tradeName": "Shree Precision",
+    "displayName": "Shree Precision",
+    "gstin": "27AAKCS4821P1ZQ",
+    "pan": "AAKCS4821P",
+    "udyamNumber": "UDYAM-MH-26-0041873",
+    "address": "Plot 14, MIDC Bhosari",
+    "city": "Pune",
+    "pincode": "411026",
+    "addressLine": "Plot 14, MIDC Bhosari, Pune - 411026",
+    "stateCode": "27",
+    "phone": "020 5550 0142",
+    "email": "accounts@shreeprecision.example"
+  },
+  "printedAt": "11-10-2026 11:30",
+  "document": {
+    "number": "FG-SHAFT-20-v2",
+    "version": 2,
+    "status": "APPROVED",
+    "statusLabel": "Approved",
+    "isDraft": false,
+    "outputQty": "1",
+    "notes": "Deburr after turning."
+  },
+  "item": { "code": "FG-SHAFT-20", "name": "Drive shaft 20 mm", "uom": "NOS" },
+  "costs": { "materialCost": "₹184.00", "operationCost": "₹96.50", "totalCost": "₹280.50", "unitCost": "₹280.50" },
+  "components": [
+    { "lineNo": 1, "itemCode": "RM-EN8-25", "itemName": "EN8 round bar 25 mm", "uom": "KG", "qty": "1.6", "scrapPct": "3", "hasScrap": true },
+    { "lineNo": 2, "itemCode": "BO-CIRCLIP-20", "itemName": "Circlip 20 mm", "uom": "NOS", "qty": "2", "scrapPct": "0", "hasScrap": false }
+  ],
+  "operations": [
+    { "seqNo": 10, "name": "Turning", "workCentre": "CNC lathe 1", "setupMinutes": "30", "runMinutesPerUnit": "6" },
+    { "seqNo": 20, "name": "Grinding", "workCentre": "Cylindrical grinder", "setupMinutes": "20", "runMinutesPerUnit": "4" }
+  ]
+}

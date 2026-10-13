@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: endustry-erp
+  datasource:
+    # File-based H2 keeps local data between restarts. Use the "postgres" profile for a real database.
+    url: jdbc:h2:file:./data/endustry;AUTO_SERVER=TRUE
+    username: sa
+    password: ""
+  flyway:
+    # The schema is owned by the migrations in src/main/resources/db/migration/<database>/ plus the
+    # Java ones in com.endustry.erp.platform.migration. A database made before Flyway is marked as
+    # version 1 on first start and keeps all its data. To change the schema, add the next V file.
+    locations: classpath:db/migration/{vendor}
+    baseline-on-migrate: true
+    baseline-version: 1
+  jpa:
+    hibernate:
+      # Hibernate only checks the tables match the code; it never changes them.
+      ddl-auto: validate
+    open-in-view: true
+    properties:
+      hibernate:
+        auto_quote_keyword: true
+  data:
+    web:
+      pageable:
+        max-page-size: 500
+
+server:
+  port: 8080
+  error:
+    include-message: never
+
+erp:
+  security:
+    # Development default only. Set ERP_JWT_SECRET (32+ bytes) in every real environment.
+    jwt-secret: ${ERP_JWT_SECRET:local-development-secret-change-me-0123456789}
+    token-hours: 12
+  seed:
+    # Loads a sample factory with six months of transactions on first start.
+    demo-data: ${ERP_DEMO_DATA:true}
+    # Password given to the seeded users. Development default only.
+    password: ${ERP_SEED_PASSWORD:Endustry@2026}
+
+logging:
+  level:
+    org.hibernate.orm.deprecation: error

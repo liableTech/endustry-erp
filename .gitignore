@@ -1,0 +1,49 @@
+# Database and runtime data (never commit)
+backend/data/
+backend/data-backup-*/
+backups/
+*.mv.db
+*.trace.db
+
+# Build output
+target/
+build/
+dist/
+!**/src/main/**/target/
+!**/src/main/**/build/
+
+# Dependencies
+node_modules/
+
+# E2E reports and test output
+e2e/.test-data/
+e2e/test-results/
+e2e/playwright-report/
+e2e/reports/
+
+# Archives
+*.zip
+*.tgz
+*.tar.gz
+
+# Secrets
+.env
+.env.*
+!.env.example
+*token*.txt
+*toekn*.txt
+*.pem
+*.key
+*.jks
+*.p12
+
+# Large marketing media (kept locally, too big for git)
+docs/video/
+docs/social/
+
+# IDE and OS
+.idea/
+.vscode/
+*.iml
+Thumbs.db
+.DS_Store
